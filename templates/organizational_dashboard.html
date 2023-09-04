@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+{% block start %}
+{% load static %}
+
+<div class="container">
+    <div class="row justify-content-center mt-2">
+        <div class="col-md-8">
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h3 class="text-center mb-4">Staff Scores</h3>
+                    <div class="d-flex justify-content-center">
+                        <canvas id="barChart" width="400" height="200"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Get staff scores from the context data
+    var staffScores = {{ staff_scores|safe }}; 
+
+    // Create Bar Graph
+    var ctx = document.getElementById('barChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: staffScores.labels,
+            datasets: [{
+                label: 'Scores',
+                data: staffScores.data,
+                backgroundColor: 'rgba(75, 192, 192, 0.6)',
+                borderColor: 'rgba(75, 192, 192, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    suggestedMax: 100,  // Set your desired maximum score here
+                    title: {
+                        display: true,
+                        text: 'Scores'
+                    }
+                },
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Staff Names'
+                    }
+                }
+            }
+        }
+    });
+</script>
+{% endblock %}

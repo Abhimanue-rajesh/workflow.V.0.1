@@ -1,0 +1,103 @@
+{% extends 'base.html' %}
+{% block start %}
+{% load static %}
+
+<div class="alltasktable">
+    <h2 class='text-center'>All Task List </h2>
+    {% if messages %}
+    <div class="alert alert-success" role="alert">
+        {% for message in messages %}
+        {{ message }}
+        {% endfor %}
+    </div>
+    {% endif %}
+    <div class="mx-auto col-11">
+        <div class="row justify-content-between">
+            <div class="col-md-4">
+                <form method="get" action="{% url 'view_tasks' %}">
+                    <div class="input-group mb-3">
+                        <input name="search" class="form-control" style="width: 60%;" placeholder="Search Task Title"
+                            aria-describedby="button-addon2">
+                        <button class="btn btn-outline-secondary" type="submit" id="button-addon2">Search</button>
+                    </div>
+                </form>
+            </div>
+            {% if user.is_superuser %}
+            <div class="col-md-4">
+                <a href="{% url 'add_task' %}" class="btn btn-success" style="width: 95px;">Add Task</a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    <table class="table table-dark table-striped table-bordered table-hover">
+        <thead class="text-center">
+            <tr style="font-size: 15px;">
+                <th scope="col">Sl. No</th>
+                <th scope="col">Title</th>
+                <th scope="col">Description</th>
+                <th scope="col">Points</th>
+                <th scope="col">Added Date</th>
+                <th scope="col">Due Date</th>
+                <th scope="col">Priority</th>
+                <th scope="col">Status</th>
+                <th scope="col">Actions</th>
+            </tr>
+        </thead>
+        <tbody class="table-group-divider text-center">
+            {% for task in tasks %}
+            <tr style="font-size: 14px;">
+                <th scope="row">{{forloop.counter}}</th>
+                <td>{{task.title}}</td>
+                <td>{{task.description|truncatechars:100}} {% if task.description|length > 100 %}<a href="#">Read
+                        More</a>{% endif %}</td>
+                <td>{{task.points}}</td>
+                <td>{{task.added_date|date:"d-m-Y"}}</td>
+                <td>{{task.due_date|date:"d-m-Y"}}</td>
+                <td>{{task.priority}}</td>
+                <td><span
+                        class="badge {% if task.status == 'Pending' %}badge-danger{% elif task.status == 'In Progress' %}badge-warning{% elif task.status == 'Completed' %}badge-success{% else %}badge-primary{% endif %}">{{task.status}}</span>
+                </td>
+                <td>
+                    {% if not user.is_superuser %}
+                    <form method="post" action="{% url 'select_task_staff' task.id %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-primary">Select</button>
+                    </form>
+                    {% endif %}
+                    {% if user.is_superuser %}
+                    <a href="{% url 'update_task' task.id %}" class="btn btn-success" style='width:83px;'>Update</a>
+                    <a href="{% url 'remove_task' task.id %}" class="btn btn-danger" data-bs-toggle='modal'
+                        data-bs-target="#remove_task{{task.id}}">Remove</a>
+                    <div class="modal" tabindex="-1" id="remove_task{{task.id}}" aria-labelledby="mymodelLabel2"
+                        aria-hidden="true">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content  text-bg-dark">
+                                <div class="modal-header">
+                                    <h3 class="modal-title">Task: {{task.title}}</h3>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true"></span>
+                                    </button>
+                                </div>
+                                <div class="modal-body">
+                                    <p>Are you sure you want to delete this task?</p>
+                                </div>
+                                <div class="modal-footer">
+                                    <form action="{% url 'remove_task' task.id %}" method="POST">
+                                        {% csrf_token %}
+                                        <input type="submit" class="btn btn-danger" value="Yes, Remove">
+                                    </form>
+                                    <button type="button" class="btn btn-secondary"
+                                        data-bs-dismiss="modal">Cancel</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% endblock %}

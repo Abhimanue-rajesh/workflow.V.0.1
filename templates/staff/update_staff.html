@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+{% block start %}
+{% load static %}
+
+
+<div class="container mt-3">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card bg-dark text-white">
+                <div class="card-body">
+                    <form method="POST">
+                        {% csrf_token %}
+                        <h3 class="mb-3 text-center">Update Staff Details</h3>
+                        <hr>
+                        {% if messages %}
+                        <div class="alert alert-info" role="alert">
+                            {% for message in messages %}
+                            {{ message }}
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                        <div class="mb-3">
+                            <label for="username" class="form-label">Username</label>
+                            <input type="text" value="{{staff.user}}" required name="username" class="form-control">
+                        </div>
+                        <div class="mb-3">
+                            <label for="first_name" class="form-label">First Name</label>
+                            <input type="text" value="{{staff.first_name}}" required name="first_name" class="form-control">
+                        </div>
+                        <div class="mb-3">
+                            <label for="last_name" class="form-label">Last Name</label>
+                            <input type="text" value="{{staff.last_name}}" required name="last_name" class="form-control">
+                        </div>
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email</label>
+                            <input type="email" value="{{staff.email}}" required name="email" class="form-control">
+                        </div>
+                        <div class="mb-3">
+                            <label for="phone_number" class="form-label">Phone Number</label>
+                            <input type="number" value="{{staff.phone_number}}" required name="phone_number" class="form-control">
+                        </div>
+                        {% comment %} #TODO reset password option to be addedd {% endcomment %}
+                        <div class="d-flex justify-content-end">
+                            <button type="submit" class="btn btn-primary"
+                                style="--bs-btn-padding-y: .5rem; --bs-btn-padding-x: 1.5rem; --bs-btn-font-size: 1rem;">Update Staff</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

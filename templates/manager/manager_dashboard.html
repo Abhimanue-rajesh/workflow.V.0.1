@@ -1,0 +1,99 @@
+{% extends 'base.html' %}
+{% block start %}
+{% load static %}
+
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-3 col-lg-2 no-padding">
+            <div class="sidebar-container">
+                <ul class="nav nav-pills flex-column mb-auto">
+                    <h3 class="text-center m-2">Admin Panel</h3>
+                    <li><a href="{% url 'add_staff' %}" class="nav-link">Add Staff</a></li>
+                    <li><a href="{% url 'view_staffs' %}" class="nav-link">All Staffs</a></li>
+                    <hr>
+                    <li><a href="{% url 'add_task' %}" class="nav-link">Add Task</a></li>
+                    <li><a href="{% url 'view_tasks' %}" class="nav-link">All Task</a></li>
+                    <hr>
+                    <li><a href="#" class="nav-link">Add Manager</a></li>
+                </ul>
+                <hr>
+            </div>
+        </div>
+        <!-- Page Content -->
+        <div class="col-md-9 col-lg-10 ml-sm-auto px-4">
+            {% if messages %}
+            <div class="alert alert-info mt-2" role="alert">
+                {% for message in messages %}
+                {{ message }}
+                {% endfor %}
+            </div>
+            {% endif %}
+            <div class="row justify-content-center m-3 text-center">
+                <div class="col-md-6">
+                    <div class="card border-primary">
+                        <div class="card-header fs-2 fw-bold">Staff</div>
+                        <div class="card-body text-primary">
+                            <h5 class="card-title">Total Staffs</h5>
+                            <p class="card-text fs-2">{{ staff_count }}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card border-primary">
+                        <div class="card-header fs-2 fw-bold">Task</div>
+                        <div class="card-body text-primary">
+                            <h5 class="card-title">Total Tasks</h5>
+                            <p class="card-text fs-2">{{ task_count }}</p>
+                        </div>
+                        <hr class="border-primary">
+                        <div class="card-body text-primary">
+                            <h5 class="card-title">Pending Tasks</h5>
+                            <p class="card-text fs-2">{{ pending_tasks_count }}</p>
+                        </div>
+                        <hr class="border-primary">
+                        <div class="card-body text-primary">
+                            <h5 class="card-title">Tasks Awaiting Review</h5>
+                            <p class="card-text fs-2">{{ review_count }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-12">
+                <div class="card border-primary m-4">
+                    <div class="card-header fs-2 fw-bold">Pending Review</div>
+                    <div class="card-body text-primary">
+                        <table class="table table-dark table-striped table-bordered table-hover">
+                            <thead class="text-center">
+                                <tr style="font-size: 15px;">
+                                    <th scope="col">Sl. No</th>
+                                    <th scope="col">Staff Name</th>
+                                    <th scope="col">Task Title</th>
+                                    <th scope="col">Date Selected</th>
+                                    <th scope="col">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody class="table-group-divider text-center">
+                                {% for task_details in completed_tasks  %}
+                                <tr style="font-size: 14px;">
+                                    <th scope="row">{{forloop.counter}}</th>
+                                    <td scope="row">{{ task_details.staff }}</td>
+                                    <td scope="row">{{ task_details.task }}</td>
+                                    <td scope="row">{{ task_details.date_selected }}</td>
+                                    <td>
+                                        <a href="{% url 'mark_task_completed' task_details.id %}" class="btn btn-success btn-sm">Reviewd</a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+{% endblock %}

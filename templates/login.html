@@ -1,0 +1,74 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="shortcut icon" type="image/png" href="{% static 'images/pulssencode.ico' %}">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz"
+        crossorigin="anonymous"></script>
+    <title>{{page_title}}</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+
+<body>
+    <header>
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark" aria-label="Offcanvas navbar large">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="/">The Groverzmart</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas"
+                    data-bs-target="#offcanvasNavbar2" aria-controls="offcanvasNavbar2" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+            </div>
+        </nav>
+    </header>
+    <div class="container col-xl-10 col-xxl-8 px-4 py-2">
+        <div class="row align-items-center g-lg-5 py-5">
+            <div class="col-lg-7 text-center text-lg-start">
+                <h1 class="display-4 fw-bold lh-1 text-body-emphasis mb-3">Workflow<br>The Groverzmart</h1>
+                <p class="col-lg-10 fs-4">Efficiently manage employees and tasks with our app. Streamline workflows,
+                    assign
+                    tasks, and track progress effortlessly for enhanced productivity.</p>
+            </div>
+            <div class="col-md-10 mx-auto col-lg-5">
+                <form method="POST" class="p-4 p-md-5 border rounded-3 bg-body-tertiary">
+                    {% csrf_token %}
+                    <h1 class="text-center mb-2">Login</h1>
+                    {% if messages %}
+                    <div class="alert alert-danger" role="alert">
+                        {% for message in messages %}
+                        {{ message }}
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                    <div class="form-floating mt-4 mb-3">
+                        <input for="username" type="text" class="form-control" name="username" required
+                            id="floatingInput" placeholder="username">
+                        <label for="floatingInput">User Name</label>
+                    </div>
+                    <div class="form-floating mb-3">
+                        <input type="password" required name="password" class="form-control" id="floatingPassword"
+                            placeholder="Password">
+                        <label for="floatingPassword">Password</label>
+                    </div>
+                    <div class="checkbox mb-3">
+                        <label>
+                            <input type="checkbox" value="remember-me"> Remember me
+                        </label>
+                    </div>
+                    <button type="submit" class="w-100 btn btn-lg btn-primary" type="submit">Login</button>
+                    <hr class="my-4">
+                    <small class="text-body-secondary">By clicking Login, you agree to the terms of use.</small>
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+
+
+</html>
