@@ -31,3 +31,4 @@ urlpatterns = [
     path('lead/update/<id>/',update_lead,name='update_lead'),
     path('lead/remove/<id>/',remove_lead,name='remove_lead')
 ]
+ 

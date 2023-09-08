@@ -5,6 +5,7 @@ from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
+from django.core.exceptions import ObjectDoesNotExist
 
 from .models import *
 
@@ -335,12 +336,21 @@ def remove_task_staff(request, id):
 
 
 def mark_completed(request, id):
-    selected_task = SelectedTask.objects.get(id=id)
-    selected_task.completed = True
-    selected_task.save()
-    # You can add a success message here using Django's messages framework
-    return redirect('profile_staff')
+    try:
+        staff = request.user.staff
+        selected_task = get_object_or_404(SelectedTask, staff=staff, task_id=id)
+        selected_task.completed = True
+        selected_task.save()
 
+        # Notify the manager that a task has been marked as completed
+        manager_message = f"Task '{selected_task.task.title}' has been marked as completed by {selected_task.staff.user.username}."
+        messages.success(request, manager_message)
+
+    except ObjectDoesNotExist:
+        # Handle the case when the SelectedTask with the provided id doesn't exist
+        messages.error(request, "SelectedTask not found.")
+
+    return redirect('profile_staff')
 
 def mark_task_completed(request, id):
     try:

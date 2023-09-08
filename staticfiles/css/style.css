@@ -1,0 +1,25 @@
+.sidebar-container {
+    width: 240px;
+    background-color: #333;
+    color: white;
+    height: 100vh;
+    padding: 10px;
+}
+
+.no-padding {
+    padding: 0;
+}
+
+.sidebar-container a {
+    color: white;
+    text-decoration: none;
+}
+
+.sidebar-container hr {
+    background-color: white;
+    margin: 15px 0;
+}
+
+.allstafftable{
+    margin: 20px;
+}
