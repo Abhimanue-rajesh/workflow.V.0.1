@@ -22,13 +22,15 @@ urlpatterns = [
     #task completion 
     path('mark_completed/<id>/', mark_completed, name='mark_completed'),
     #task review
-    path('manager/reviewed/<id>/',mark_task_completed,name='mark_task_completed'),
+    path('manager/reviewed/<id>/',task_reviewed,name='task_reviewed'),
     #organizational Dashboard
     path('all/organizational_dashboard/',organizational_dashboard,name='organizational_dashboard'),
     #leads
     path('leads',leads,name='leads'),
     path('lead/add/',add_lead,name='add_lead'),
     path('lead/update/<id>/',update_lead,name='update_lead'),
-    path('lead/remove/<id>/',remove_lead,name='remove_lead')
+    path('lead/remove/<id>/',remove_lead,name='remove_lead'),
+    #auth
+    path('access-denied/',access_denied, name='access_denied'),
 ]
  

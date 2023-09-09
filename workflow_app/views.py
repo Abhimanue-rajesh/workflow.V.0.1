@@ -3,13 +3,21 @@ from datetime import datetime
 
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required, user_passes_test
+from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
-from django.core.exceptions import ObjectDoesNotExist
 
 from .models import *
 
-#TODO need to add security features to all the views 
+
+def is_superuser(user):
+    return user.is_superuser
+
+def access_denied(request):
+    # Log the user out
+    logout(request)
+    return render(request, 'access_denied.html')
 
 # Create your views here.
 def login_page(request):
@@ -39,29 +47,32 @@ def logout_all(request):
     logout(request)
     return redirect('login_page')
 
-
+@user_passes_test(is_superuser, login_url='access_denied')
 def manager_dashboard(request):
     # Query completed tasks pending review
     staff_count = Staff.objects.count()
     task_count = Task.objects.count()
-    pending_tasks_count = Task.objects.filter(status='Pending').count()
-    review_count = Task.objects.filter(
-        status='Waiting for Confirmation').count()
+    pending_tasks = Task.objects.filter(status='Pending')
+    pending_task_count = pending_tasks.count()
+    completed_tasks = SelectedTask.objects.filter(completed=True, reviewed_by=None)
+    review_count = completed_tasks.count()
+    lead_count = Lead.objects.values('contact_number').count()
+    interested_leads = Lead.objects.filter(interest='Interested')
+    interested_leads_count = interested_leads.count()
 
-    completed_tasks = SelectedTask.objects.filter(
-        completed=True, reviewed_by=None)
-    print(completed_tasks)
     context = {
         'page_title': 'Manager Dashboard',
         'completed_tasks': completed_tasks,
         'staff_count': staff_count,
         'task_count': task_count,
-        'pending_tasks_count': pending_tasks_count,
+        'pending_tasks_count': pending_task_count,
         'review_count': review_count,
+        'lead_count' : lead_count,
+        'interested_leads_count': interested_leads_count,
     }
     return render(request, 'manager/manager_dashboard.html', context)
 
-
+@user_passes_test(is_superuser, login_url='access_denied')
 def add_staff(request):
     if request.method == 'POST':
         # Retrieve form data from the request
@@ -111,7 +122,7 @@ def add_staff(request):
 
     return render(request, 'staff/add_staff.html', context)
 
-
+@user_passes_test(is_superuser, login_url='access_denied')
 def view_staffs(request):
     # get all staff data from the database
     all_staff_data = Staff.objects.all()
@@ -123,7 +134,7 @@ def view_staffs(request):
     }
     return render(request, 'staff/view_staffs.html', context)
 
-
+@user_passes_test(is_superuser, login_url='access_denied')
 def update_staff(request, id):
     # Get the object with the given ID
     staff = get_object_or_404(Staff, id=id)  # staff data before updating
@@ -173,14 +184,14 @@ def update_staff(request, id):
     }
     return render(request, 'staff/update_staff.html', context)
 
-
+@user_passes_test(is_superuser, login_url='access_denied')
 def remove_staff(request, id):
     staff = get_object_or_404(Staff, id=id)
     # this will also delete the user associated with the staff
     staff.delete()
     return redirect('view_staffs')
 
-
+@login_required
 def profile_staff(request):
     staff = Staff.objects.get(user=request.user)
     selected_tasks = SelectedTask.objects.filter(staff=staff)
@@ -194,7 +205,7 @@ def profile_staff(request):
     }
     return render(request, 'staff/staff_profile.html', context)
 
-
+@user_passes_test(is_superuser, login_url='access_denied')
 def add_task(request):
     if request.method == 'POST':
         task_data = request.POST
@@ -244,7 +255,7 @@ def add_task(request):
     }
     return render(request, 'task/add_task.html', context)
 
-
+@login_required
 def view_tasks(request):
     tasks = Task.objects.all()
 
@@ -259,7 +270,7 @@ def view_tasks(request):
     }
     return render(request, 'task/view_tasks.html', context)
 
-
+@user_passes_test(is_superuser, login_url='access_denied')
 def update_task(request, id):
     task = get_object_or_404(Task, id=id)
 
@@ -306,13 +317,13 @@ def update_task(request, id):
     }
     return render(request, 'task/update_task.html', context)
 
-
+@user_passes_test(is_superuser, login_url='access_denied')
 def remove_task(request, id):
     task = get_object_or_404(Task, id=id)
     task.delete()
     return redirect('view_tasks')
 
-
+@login_required
 def select_task_staff(request, id):
     if request.method == 'POST':
         task = get_object_or_404(Task, id=id)
@@ -327,14 +338,14 @@ def select_task_staff(request, id):
 
     return redirect('view_tasks')
 
-
+@login_required
 def remove_task_staff(request, id):
     staff = request.user.staff
     selected_task = get_object_or_404(SelectedTask, staff=staff, task_id=id)
     selected_task.delete()
     return redirect('profile_staff')
 
-
+@login_required
 def mark_completed(request, id):
     try:
         staff = request.user.staff
@@ -352,29 +363,40 @@ def mark_completed(request, id):
 
     return redirect('profile_staff')
 
-def mark_task_completed(request, id):
+@login_required
+def task_reviewed(request, id):
     try:
-        task = Task.objects.get(id=id)
-        selected_task = SelectedTask.objects.get(id=id)
-
-        # Check if the task has not been reviewed already
-        if selected_task.reviewed_by is None:
-            task.status = 'completed'
-            # Assign the manager who reviewed the task
-            selected_task.reviewed_by = request.user
-            task.save()
-            selected_task.save()
-            messages.success(
-                request, f'Task "{task.title}" marked as completed.')
+        # Get the selected task by its id
+        selected_task = get_object_or_404(SelectedTask, id=id)
+        
+        # Check if the task has already been reviewed by the same user
+        if selected_task.reviewed_by == request.user:
+            messages.warning(request, "You have already reviewed this task.")
         else:
-            messages.warning(
-                request, f'Task "{task.title}" has already been reviewed.')
+            # Mark the selected task as completed
+            selected_task.completed = True
+            selected_task.reviewed_by = request.user  # Set the reviewed_by field
+            selected_task.save()
 
-    except Task.DoesNotExist:
-        messages.error(request, 'Task not found.')
+            # Update the associated task's status to 'completed'
+            selected_task.task.status = 'completed'
+            selected_task.task.save()
 
-    return redirect('manager_dashboard')
+            # Add a success message
+            messages.success(request, "Task marked as completed and reviewed successfully.")
+        
+        # Redirect to the manager's dashboard or any other desired URL
+        return redirect('manager_dashboard')
+    except SelectedTask.DoesNotExist:
+        # Handle the case where the SelectedTask with the provided id doesn't exist
+        messages.error(request, "SelectedTask not found.")
+        return redirect('manager_dashboard')
+    except Exception as e:
+        # Handle other potential exceptions here
+        messages.error(request, f"An error occurred: {str(e)}")
+        return redirect('manager_dashboard')
 
+@login_required
 def organizational_dashboard(request):
     staff_members = Staff.objects.all()
     staff_scores = {
@@ -393,7 +415,7 @@ def organizational_dashboard(request):
     }
     return render(request, 'organizational_dashboard.html', context)
 
-
+@login_required
 def leads(request):
     all_lead_data = Lead.objects.all()
     
@@ -407,6 +429,7 @@ def leads(request):
     }
     return render(request, 'leads/view_leads.html',context)
 
+@login_required
 def add_lead(request):
     if request.method == 'POST':
         # Retrieve form data from the request
@@ -443,6 +466,7 @@ def add_lead(request):
     }
     return render(request, 'leads/add_lead.html',context)
 
+@login_required
 def update_lead(request, id):
     lead = get_object_or_404(Lead, id = id)
 
@@ -475,7 +499,7 @@ def update_lead(request, id):
     }
     return render(request, 'leads/update_lead.html',context)
 
-
+@user_passes_test(is_superuser, login_url='access_denied')
 def remove_lead(request, id):
     lead = get_object_or_404(Lead, id=id)
     lead.delete()

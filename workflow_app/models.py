@@ -105,6 +105,7 @@ class Lead(models.Model):
         ('call_back_later', 'Call Back Later'),
         ('not_interested', 'Not Interested'),
         ('not_reachable', 'Not Reachable'),
+        ('interested', 'Interested') 
     ]
     interest = models.CharField(max_length=20, choices=interest_choices)
     lead_source = models.CharField(max_length=255)

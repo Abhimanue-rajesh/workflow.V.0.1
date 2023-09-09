@@ -2,7 +2,7 @@
 {% block start %}
 {% load static %}
 
-<div class="alltasktable">
+<div class="ml-sm-auto px-4">
     <h2 class='text-center'>All Task List </h2>
     {% if messages %}
     <div class="alert alert-success" role="alert">
@@ -11,9 +11,9 @@
         {% endfor %}
     </div>
     {% endif %}
-    <div class="mx-auto col-11">
+    <div class="mx-auto col-12 mt-3">
         <div class="row justify-content-between">
-            <div class="col-md-4">
+            <div class="col-md-6">
                 <form method="get" action="{% url 'view_tasks' %}">
                     <div class="input-group mb-3">
                         <input name="search" class="form-control" style="width: 60%;" placeholder="Search Task Title"
@@ -23,8 +23,8 @@
                 </form>
             </div>
             {% if user.is_superuser %}
-            <div class="col-md-4">
-                <a href="{% url 'add_task' %}" class="btn btn-success" style="width: 95px;">Add Task</a>
+            <div class="col-md-4 text-end">
+                <a href="{% url 'add_task' %}" class="btn btn-primary" style="width: 95px;">Add Task</a>
             </div>
             {% endif %}
         </div>
